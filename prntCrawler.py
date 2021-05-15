@@ -1,12 +1,15 @@
-import requests
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from time import sleep
+import requests
+import os
 
-CHROMEDRIVER = "F:\Programme\Chromedriver\chromedriver.exe"
+CHROMEDRIVER = os.getenv("CHROMEDRIVER")
 OUTPUTDIR = "E:\\Downloads\\prnt\\"
+
 b = [0, 0]
 z = 0
-
+agents = ["Chrome"]
 
 o = webdriver.ChromeOptions()
 
@@ -16,6 +19,16 @@ o.add_argument('--log-level=3')
 o.add_argument("--disable-gpu")
 o.add_experimental_option('excludeSwitches', ['enable-logging'])
 d = webdriver.Chrome(executable_path=CHROMEDRIVER, options=o)
+
+def loadAgents():
+    try:
+        with open("useragents.txt", "r") as f:
+            for l in f.readlines():
+                agents.append(str(l))
+    except:
+        print("[WARN] ### The User-Agents could not be imported! Current working directory has to be \'prnt-crawler\' ###")
+        sleep(10)
+        pass
 
 def download(id):
     d.get("https://prnt.sc/"+id)
@@ -58,5 +71,3 @@ while True:
             if b[0] < 25:
                 b[0] += 1
                 z = 0
-
-d.close()
