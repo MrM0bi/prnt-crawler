@@ -1,6 +1,6 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
 from time import sleep
+import random
 import requests
 import os
 
@@ -11,40 +11,35 @@ b = [0, 0]
 z = 0
 agents = ["Chrome"]
 
-o = webdriver.ChromeOptions()
-
-o.add_argument("--headless")
-o.add_argument("--silent")
-o.add_argument('--log-level=3')
-o.add_argument("--disable-gpu")
-o.add_experimental_option('excludeSwitches', ['enable-logging'])
-d = webdriver.Chrome(executable_path=CHROMEDRIVER, options=o)
-
 def loadAgents():
     try:
         with open("useragents.txt", "r") as f:
             for l in f.readlines():
-                agents.append(str(l))
+                agents.append(str(l).replace("\n", ""))
     except:
         print("[WARN] ### The User-Agents could not be imported! Current working directory has to be \'prnt-crawler\' ###")
         sleep(10)
         pass
 
 def download(id):
-    d.get("https://prnt.sc/"+id)
-    html = d.page_source
+    rndagent = str(random.choice(agents))
 
+    url = "https://prnt.sc/{}".format(id)
+    headers = {'User-Agent': rndagent}
 
-    if len(str(html)) > 100:
+    html = requests.get(url, headers=headers).text
+
+    if len(str(html)) > 500:
         soup = BeautifulSoup(html, "html.parser")
 
         imglink = soup.find("img", {"class": "screenshot-image"})["src"]
 
+        # Check if screenshot is present
         if imglink != "//st.prntscr.com/2021/04/08/1538/img/0_173a7b_211be8ff.png":
             try:
                 print("["+id+"] -> "+str(imglink))
 
-                fullpath = "{}{}".format(OUTPUTDIR, imglink[imglink.rindex("/")+1 : ])
+                fullpath = OUTPUTDIR + imglink[imglink.rindex("/")+1 : ]
 
                 with open(fullpath, 'wb') as f:
                     f.write(requests.get(imglink).content)
@@ -52,11 +47,15 @@ def download(id):
                 print("["+id+"] -> Exception")
                 pass
         else:
-            print("["+id+"] -> Screen removed")
+            print("["+id+"] -> Screenshot removed")
 
     else:
         print("["+id+"] -> Not been able to get Image")
 
+
+### START ########
+
+loadAgents()
 
 while True:
     if z < 9999:
