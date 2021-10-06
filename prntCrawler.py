@@ -7,8 +7,8 @@ import os
 CHROMEDRIVER = os.getenv("CHROMEDRIVER")
 OUTPUTDIR = "E:\\Downloads\\prnt\\"
 
-b = [0, 0]
-z = 0
+b = [0, 3]
+z = 0000
 agents = ["Chrome"]
 
 def loadAgents():
@@ -30,12 +30,16 @@ def download(id):
     html = requests.get(url, headers=headers).text
 
     if len(str(html)) > 500:
-        soup = BeautifulSoup(html, "html.parser")
+        imglink = None
 
-        imglink = soup.find("img", {"class": "screenshot-image"})["src"]
+        soup = BeautifulSoup(html, "html.parser")
+        img = soup.find("img", {"class": "screenshot-image"})
+
+        if img is not None:
+            imglink = img["src"]
 
         # Check if screenshot is present
-        if imglink != "//st.prntscr.com/2021/04/08/1538/img/0_173a7b_211be8ff.png":
+        if imglink is not None and imglink != "//st.prntscr.com/2021/04/08/1538/img/0_173a7b_211be8ff.png":
             try:
                 print("["+id+"] -> "+str(imglink))
 
